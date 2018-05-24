@@ -6,65 +6,84 @@
 
     <title>paper-snackbar demo</title>
 
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../../@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
 
-    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
-    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
-    <link rel="import" href="../paper-snackbar.html">
+    <script type="module" src="../../iron-demo-helpers/demo-pages-shared-styles.js"></script>
+    <script type="module" src="../../iron-demo-helpers/demo-snippet.js"></script>
+    <script type="module" src="../paper-snackbar.js"></script>
 
-    <custom-style>
-      <style is="custom-style" include="demo-pages-shared-styles">
-      </style>
-    </custom-style>
+    <!-- FIXME(polymer-modulizer):
+        These imperative modules that innerHTML your HTML are
+        a hacky way to be sure that any mixins in included style
+        modules are ready before any elements that reference them are
+        instantiated, otherwise the CSS @apply mixin polyfill won't be
+        able to expand the underlying CSS custom properties.
+        See: https://github.com/Polymer/polymer-modulizer/issues/154
+        -->
+    <script type="module">
+      const $_documentContainer = document.createElement('template');
+
+      $_documentContainer.innerHTML = `<custom-style>
+            <style is="custom-style" include="demo-pages-shared-styles">
+            </style>
+          </custom-style>`;
+
+      document.body.appendChild($_documentContainer.content);
+    </script>
   </head>
   <body>
-    <div class="vertical-section-container centered">
-      <h3>Basic paper-snackbar demo</h3>
-      <demo-snippet>
-        <template>
-          <style>
-            paper-snackbar {
-              --paper-snackbar-background:     #323232;
-              --paper-snackbar-text:           #ffffff;
-              --paper-snackbar-link:           #f4cb1e;
-            }
-          </style>
-          
-          <paper-snackbar></paper-snackbar>
-          
-          <button onclick="testAll()">Message + Link</button>
-          <button onclick="testMessage()">Only Message</button>
-          
-          <script>
-            function testAll() {
-
-              document.dispatchEvent(new CustomEvent('paper-snackbar-notify', {
-                  bubbles: true, 
-                  composed: true,
-                  detail: { 
-                    message: 'Hi! I am a paper-snackbar!', 
-                    targetTitle: 'Magic Link',
-                    targetUrl: '#'
+    <script type="module">
+      const $_documentContainer = document.createElement('template');
+      
+      $_documentContainer.innerHTML = `<div class="vertical-section-container centered">
+            <h3>Basic paper-snackbar demo</h3>
+            <demo-snippet fun="[[aa]]">
+              <template>
+                <style>
+                  paper-snackbar {
+                    --paper-snackbar-background:     #323232;
+                    --paper-snackbar-text:           #ffffff;
+                    --paper-snackbar-link:           #f4cb1e;
                   }
-              }));
+                </style>
+                
+                <paper-snackbar></paper-snackbar>
+                
+                <button onclick="testAll()">Message + Link</button>
+                <button onclick="testMessage()">Only Message</button>
+              </template>
+            </demo-snippet>
+          </div>`;
 
+      
+      document.body.appendChild($_documentContainer.content);
+    </script>
+
+    <script>
+      function testAll() {
+
+        document.dispatchEvent(new CustomEvent('paper-snackbar-notify', {
+            bubbles: true, 
+            composed: true,
+            detail: { 
+              message: 'Hi! I am a paper-snackbar!', 
+              targetTitle: 'Magic Link',
+              targetUrl: '#'
             }
+        }));
 
-            function testMessage() {
+        }
 
-              document.dispatchEvent(new CustomEvent('paper-snackbar-notify', {
-                  bubbles: true, 
-                  composed: true,
-                  detail: { 
-                    message: 'Hi! I am a paper-snackbar with only a message!'
-                  }
-              }));
+      function testMessage() {
 
+        document.dispatchEvent(new CustomEvent('paper-snackbar-notify', {
+            bubbles: true, 
+            composed: true,
+            detail: { 
+              message: 'Hi! I am a paper-snackbar with only a message!'
             }
-          </script>
-        </template>
-      </demo-snippet>
-
-    </div>
+        }));
+      }
+    </script>
   </body>
 </html>

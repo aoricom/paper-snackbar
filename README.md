@@ -22,7 +22,7 @@ Providing brief feedback about an operation through a message at the bottom of t
 <custom-element-demo height="250">
   <template>
     <script src="../webcomponentsjs/webcomponents-lite.js"></script>
-    <link rel="import" href="paper-snackbar.html">
+    <script type="module" src="paper-snackbar.html">
     <next-code-block></next-code-block>
   </template>
 </custom-element-demo>
@@ -70,9 +70,9 @@ The following custom properties and mixins are available for styling:
 
 Presuming you have a lot of forms or elements that just want to send snackbar messages all day long, you can also use the class mixin.
 
-1. Import `paper-snackbar-mixin.html` into your element:
+1. Import `paper-snackbar-mixin.js` into your element:
   ```html
-  <link rel="import" href="../bower_components/paper-snackbar/paper-snackbar-mixin.html">
+  <src type="module" src="../node_modules/paper-snackbar/paper-snackbar-mixin.js">
   ```
 2. Extend from PaperSnackbarNotify():
   ```javascript

@@ -1,0 +1,213 @@
+import { PolymerElement } from '../polymer/polymer-element.js';
+import '../polymer/lib/mixins/gesture-event-listeners.js';
+import { Debouncer } from '../polymer/lib/utils/debounce.js';
+import { timeOut } from '../polymer/lib/utils/async.js';
+import '../paper-button/paper-button.js';
+import '../font-roboto/roboto.js';
+import { html } from '../polymer/lib/utils/html-tag.js';
+import { flush } from '../polymer/lib/legacy/polymer.dom.js';
+/**
+ * `paper-snackbar`
+ * Providing brief feedback about an operation through a message at the bottom of the screen that is loosely based on the [Material Design spec](https://material.io/guidelines/components/snackbars-toasts.html#).
+ *
+ * ## Usage
+ *
+ * `<paper-snackbar>` sits at the top level of your application and listens for a custom event called `paper-snackbar-notify`. The basic steps for using it are:
+ * 1. Find a nice place to put it in your application. I usually choose my top level app element.
+ * 2. Call `paper-snackbar-notify` via `this.dispatchEvent(new CustomEvent('paper-snackbar-notify', ...));`.
+ * 3. Yipee, snackbar shows up!
+ *
+ * ## Styling
+ *
+ * The following custom properties and mixins are available for styling:
+ *
+ * | Custom property               | Description                        | Default   |
+ * | ---                           | ---                                | ---       |
+ * | `--paper-snackbar-background` | Background color to entire element | `#323232` |
+ * | `--paper-snackbar-text`       | Color applied to element text      | `#ffffff` |
+ * | `--paper-snackbar-link`       | Color applied to link element text | `#f4cb1e` |
+ *
+ * @customElement
+ * @polymer
+ * @demo demo/index.html
+ */
+class PaperSnackbar extends PolymerElement {
+  static get template() {
+    return html`
+    <style>
+      :host {
+        --paper-snackbar-background:     #323232;
+        --paper-snackbar-text:           #ffffff;
+        --paper-snackbar-link:           #f4cb1e;
+      }
+      :host {
+        display: block;
+        position: fixed;
+        left: calc(50% - 300px);
+        right: calc(50% - 300px);
+        bottom: 0;
+        background-color: var(--paper-snackbar-background);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        color: var(--paper-snackbar-text);
+        width: 600px;
+        padding: 16px;
+        visibility: hidden;
+        text-align: center;
+        will-change: transform;
+        -webkit-transform: translate3d(0, 100%, 0);
+        transform: translate3d(0, 100%, 0);
+        transition-property: visibility, -webkit-transform, opacity;
+        transition-property: visibility, transform, opacity;
+        transition-duration: 0.2s;
+        font-family: 'Roboto', 'Noto', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        z-index: 105;
+      }
+
+      :host(.opened) {
+        visibility: visible;
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+      }
+      
+      @media (max-width: 767px) {
+        :host {
+          top: auto;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          width: auto;
+          -webkit-transform: translate3d(0, 100%, 0);
+          transform: translate3d(0, 100%, 0);
+        }
+      }
+
+      #container {
+        display: flex;
+        align-items: center;
+      }
+
+      #message {
+        flex: 3;
+        text-align: left;
+      }
+
+      #action {
+        flex: 1;
+      }
+
+      #action a, #action a:visited {
+        color: var(--paper-snackbar-link);
+        text-transform: uppercase;
+        text-decoration: none;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+    </style>
+
+    <div id="container">
+      <div id="message">{{message}}</div>
+      <div id="action">
+        <a href\$="{{targetUrl}}">
+          <paper-button on-tap="close">{{targetTitle}}</paper-button>
+        </a>
+      </div>
+    </div>
+`;
+  }
+
+  static get is() { return 'paper-snackbar'; }
+  static get properties() {
+    return {
+      
+      /**
+      * Defines the message of the snackbar
+      */
+      message: {
+        type: String,
+        value: ''
+      },
+
+      /**
+      * Defines the text of the snackbar link
+      */
+      targetTitle: {
+        type: String,
+        value: ''
+      },
+      
+      /**
+      * Defines the href of the snackbar link
+      */
+      targetUrl: {
+        type: String,
+        value: ''
+      },
+
+      /**
+      * Amount of time before snackbar hides. Defaults to 5000 ms.
+      */
+      hide: {
+        type: Number,
+        value: 5000
+      }
+    };
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+
+    // Set our listener
+    document.addEventListener('paper-snackbar-notify', (event) => {
+      this.open(event.detail.message, event.detail.targetTitle, 
+        event.detail.targetUrl);
+    });
+
+  }
+
+  /**
+  * Show the snackbar.
+  *
+  * @param {string} messageString Defines the message of the snackbar
+  * @param {string} targetTitle Defines the text of the snackbar link
+  * @param {string} targetUrl Defines the href of the snackbar link
+  * @return {Void}
+  */
+  open(messageString, targetTitle, targetUrl) {
+    flush();
+
+    this.message = messageString;
+
+    // If we don't have a targetTitle, we presume we're just
+    // showing the user a message of some type
+    if (targetTitle  && targetUrl) {
+      this.targetTitle = targetTitle;
+      this.targetUrl = targetUrl;
+    }
+    else {
+      this.$.action.classList.add('hidden');
+    }
+  
+    this.offsetHeight && this.classList.add('opened');
+
+    this._closeDebouncer = Debouncer.debounce(this._closeDebouncer,
+      timeOut.after(this.hide), this.close.bind(this));
+  }
+
+  /**
+  * Hide the snackbar.
+  *
+  * @return {Void}
+  */
+  close() {
+    this.classList.remove('opened');
+    this.$.action.classList.remove('hidden');
+    this.message = '';
+    this.targetTitle = '';
+  }
+}
+
+window.customElements.define(PaperSnackbar.is, PaperSnackbar);

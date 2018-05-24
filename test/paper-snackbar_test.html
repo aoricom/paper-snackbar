@@ -6,10 +6,10 @@
 
     <title>paper-snackbar test</title>
 
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-    <script src="../../web-component-tester/browser.js"></script>
+    <script src="../../../@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
+    <script src="../../../wct-browser-legacy/browser.js"></script>
 
-    <link rel="import" href="../paper-snackbar.html">
+    <script type="module" src="../paper-snackbar.js"></script>
   </head>
   <body>
 
@@ -25,7 +25,8 @@
       </template>
     </test-fixture>
 
-    <script>
+    <script type="module">
+      import '../paper-snackbar.js';
       suite('paper-snackbar', function() {
 
         test('instantiating the element with default properties works', function() {
